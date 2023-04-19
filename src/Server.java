@@ -22,7 +22,7 @@ public class Server {
 
     /**
      Ce constructeur va créer une instance d'un serveur ainsi que le eventhandler qui lui sera associé.
-     Le port sur lequel il est possible pour un client de se connecter sur le serveur.
+     @param port Le port sur lequel il est possible pour un client de se connecter sur le serveur.
      */
 
     public Server(int port) throws IOException {
@@ -32,16 +32,17 @@ public class Server {
     }
 
     /**
-     Va ajouter un eventHandler.
-     le eventHandler à ajouter.
+     Va ajouter au ArrayList Handlers un EventHandler pris en paramètre.
+     @param h Ce paramètre est le EventHandler à ajouter.
      */
     public void addEventHandler(EventHandler h) {
         this.handlers.add(h);
     }
 
     /**
-     TODO
-     @param arg cmd et arg.
+     Cette fonction va attribuer les valeurs de cmd et de arg à chaque handle des membres du ArrayList EventHandler.
+     @param cmd Ce paramètre est la commande recu de la fonction listen().
+     @param arg Ce paramètre est l'argument suivant la commande recu de la fonction listen().
      */
     private void alertHandlers(String cmd, String arg) {
         for (EventHandler h : this.handlers) {
@@ -50,7 +51,10 @@ public class Server {
     }
 
     /**
-     La méthode qui va débuter le fonctionnement du serveur.
+     La méthode qui va débuter le fonctionnement du serveur en acceptant la connection avec le client et en créant un
+     ObjectInputStream et ObjectOutputStream prèts à recevoir ou à envoyer de l'information au Client. Il va appeler
+     la fonction listen() jusqu'à la réception d'une commande puis va se déconnecter en appelant la fonction
+     disconnect().
      */
 
     public void run() {
@@ -70,7 +74,8 @@ public class Server {
     }
 
     /**
-     Fonction qui écoute les événement générés par le client.
+     Fonction qui qui va recevoir une ligne de texte du client, puis qui va la transformer en pair de deux String
+     dont il va attribuer la valeur respectivement aux variables cmd et arg
      */
 
     public void listen() throws IOException, ClassNotFoundException {
@@ -84,8 +89,8 @@ public class Server {
     }
 
     /**
-     Méthode qui pair.
-     pas clair encore
+     Cette méthode permet de séparer la ligne de texte reçu par le client en une paire d'éléments cmd et arg.
+     @param line la ligne de texte reçu du client et créée par la fonction listen() qui va être séparéé en paire.
      */
 
     public Pair<String, String> processCommandLine(String line) {
@@ -96,7 +101,7 @@ public class Server {
     }
 
     /**
-     Fonction qui permet de se déconnecter du serveur.
+     Fonction qui permet de déconnecter le client du serveur.
      */
 
     public void disconnect() throws IOException {
@@ -106,8 +111,10 @@ public class Server {
     }
 
     /**
-     Fonction qui handle les events.
-     @param arg cmd et arg?
+     Cette fonction va prendre les valeurs de cmd et arg recues des autres fonctions et va finalement
+     appeler la fonction et l'argument approprié.
+     @param cmd la commande qui va déterminer la fonction à appeler.
+     @param arg l'argument qui va indiquer la session utilisée par HandleLoadCourses
      */
     public void handleEvents(String cmd, String arg) {
         System.out.println(cmd);
@@ -150,20 +157,21 @@ public class Server {
     }
 
     /**
-     Récupérer l'objet 'RegistrationForm' envoyé par le client en utilisant 'objectInputStream', l'enregistrer dans un fichier texte
-     et renvoyer un message de confirmation au client.
-     La méthode gére les exceptions si une erreur se produit lors de la lecture de l'objet, l'écriture dans un fichier ou dans le flux de sortie.
+     Récupérer l'objet 'RegistrationForm' envoyé par le client en utilisant 'objectInputStream', l'enregistrer dans
+     un fichier texte et renvoyer un message de confirmation au client. La méthode gére les exceptions si une erreur
+     se produit lors de la lecture de l'objet, l'écriture dans un fichier ou dans le flux de sortie.
      */
     public void handleRegistration() {
         try {
             RegistrationForm fiche = (RegistrationForm) objectInputStream.readObject();
-            String path = System.getProperty("user.home") + File.separator + "Desktop" + File.separator + "ServeurTest";
+            String path = System.getProperty("user.home") + File.separator + "Desktop" + File.separator + "Serveur";
             File customPath = new File(path + File.separator + "inscription.txt");
-            FileWriter myWriter = new FileWriter(customPath);
-            myWriter.write(fiche.getCourse().getSession() + "\t" + fiche.getCourse().getCode() + "\t" +
+            //FileWriter writer = new FileWriter(customPath);
+            PrintWriter writer = new PrintWriter(new FileWriter(customPath, true));
+            writer.write(fiche.getCourse().getSession() + "\t" + fiche.getCourse().getCode() + "\t" +
                     fiche.getMatricule() + "\t" + fiche.getPrenom() + "\t" + fiche.getNom() + "\t" +
                     fiche.getEmail() + "\n");
-            myWriter.close();
+            writer.close();
             System.out.println("Inscription ajouter au fichier txt.");
             objectOutputStream.writeObject("Félicitation! Inscription réussie de " + fiche.getPrenom() +
                     " au cours " + fiche.getCourse().getCode() + ".");
